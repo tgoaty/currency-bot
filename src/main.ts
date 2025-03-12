@@ -2,6 +2,7 @@ import { Bot } from "grammy";
 import "jsr:@std/dotenv/load";
 import { startCommand } from "./handlers/startCommand.ts";
 import { currenciesListCommand } from "./handlers/currenciesListCommand.ts";
+import { currencyRate } from "./handlers/currencyRate.ts";
 
 const TOKEN = Deno.env.get("BOT_TOKEN");
 
@@ -19,6 +20,7 @@ bot.api.setMyCommands([
 bot.use(
 	startCommand(),
 	currenciesListCommand(),
+	currencyRate(),
 );
 
 bot.start();
