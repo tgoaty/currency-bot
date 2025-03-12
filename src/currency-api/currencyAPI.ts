@@ -19,8 +19,7 @@ interface JsonCBR {
 }
 
 export class CurrencyAPI {
-	private static readonly url: string =
-		"https://www.cbr-xml-daily.ru/daily_json.js";
+	private static readonly url: string = "https://www.cbr-xml-daily.ru/daily_json.js";
 	private static cachedData: JsonCBR | null = null;
 	private static lastFetchTimestamp: number = 0;
 	private static readonly CACHE_DURATION: number = 60 * 60 * 1000; // 1 hour
@@ -46,6 +45,13 @@ export class CurrencyAPI {
 
 	static async getCurrencyList(): Promise<string[]> {
 		const json = await this.getJsonCBR();
-		return Object.keys(json.Valute);
+		const result: string[] = [];
+
+		for (const item in json.Valute) {
+			const valutePair = [item, json.Valute[item].Name];
+			result.push(valutePair.join(" - "));
+		}
+
+		return result;
 	}
 }

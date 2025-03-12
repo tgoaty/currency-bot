@@ -11,6 +11,11 @@ if (!TOKEN) {
 
 const bot = new Bot(TOKEN);
 
+bot.api.setMyCommands([
+	{ command: "start", description: "Starts working with the bot." },
+	{ command: "list", description: "Shows a list of currency codes." },
+]);
+
 bot.use(
 	startCommand(),
 	currenciesListCommand(),
