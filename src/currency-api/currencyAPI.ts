@@ -22,7 +22,7 @@ export class CurrencyAPI {
 	private static readonly url: string = "https://www.cbr-xml-daily.ru/daily_json.js";
 	private static cachedData: JsonCBR | null = null;
 	private static lastFetchTimestamp: number = 0;
-	private static readonly CACHE_DURATION: number = 60 * 60 * 1000; // 1 hour
+	private static readonly CACHE_DURATION: number = 10 * 60 * 1000; // 10 minutes
 
 	static async getJsonCBR(): Promise<JsonCBR> {
 		const now = Date.now();
@@ -30,16 +30,17 @@ export class CurrencyAPI {
 			this.cachedData && now - this.lastFetchTimestamp <= this.CACHE_DURATION
 		) {
 			return this.cachedData;
-		}
-		try {
-			const response = await fetch(this.url);
+		} else {
+			try {
+				const response = await fetch(this.url);
 
-			this.cachedData = await response.json();
-			this.lastFetchTimestamp = now;
+				this.cachedData = await response.json();
+				this.lastFetchTimestamp = now;
 
-			return this.cachedData as JsonCBR;
-		} catch (error) {
-			throw error;
+				return this.cachedData as JsonCBR;
+			} catch (error) {
+				throw error;
+			}
 		}
 	}
 
@@ -54,42 +55,31 @@ export class CurrencyAPI {
 
 		return result;
 	}
-	private static async getValue(currency: string): Promise<number | string> {
+
+	private static async getValue(currency: string): Promise<number> {
 		const json = await this.getJsonCBR();
 
 		try {
-			if (json.Valute[currency]) {
-				return json.Valute[currency].Value;
-			} else {
-				return currency;
-			}
+			return json.Valute[currency].Value;
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	static async getCurrencyRate(firstCurrency: string, secondCurrency: string): Promise<number | string> {
+	static async getCurrencyRate(firstCurrency: string, secondCurrency: string): Promise<number> {
 		try {
 			if (firstCurrency === "RUB") {
 				return await this.getValue(secondCurrency);
-			}
-			if (secondCurrency === "RUB") {
+			} else if (secondCurrency === "RUB") {
 				const firstCurrencyValue = await this.getValue(firstCurrency);
-				if (typeof firstCurrencyValue === "string") {
-					return firstCurrency;
-				}
-				return 1 / firstCurrencyValue;
-			}
-			const firstCurrencyValue = await this.getValue(firstCurrency);
-			const secondCurrencyValue = await this.getValue(secondCurrency);
-			if (typeof firstCurrencyValue === "string") {
-				return firstCurrency;
-			}
-			if (typeof secondCurrencyValue === "string") {
-				return secondCurrency;
-			}
 
-			return firstCurrencyValue / secondCurrencyValue;
+				return 1 / firstCurrencyValue;
+			} else {
+				const firstCurrencyValue = await this.getValue(firstCurrency);
+				const secondCurrencyValue = await this.getValue(secondCurrency);
+
+				return firstCurrencyValue / secondCurrencyValue;
+			}
 		} catch (error) {
 			throw error;
 		}
