@@ -1,4 +1,4 @@
-interface Currency {
+export interface Currency {
 	"ID": string;
 	"NumCode": string;
 	"CharCode": string;
@@ -8,7 +8,7 @@ interface Currency {
 	"Previous": number;
 }
 
-interface JsonCBR {
+export interface JsonCBR {
 	"Date": string;
 	"PreviousDate": string;
 	"PreviousURL": string;
@@ -20,9 +20,9 @@ interface JsonCBR {
 
 export class CurrencyAPI {
 	private static readonly url: string = "https://www.cbr-xml-daily.ru/daily_json.js";
-	private static cachedData: JsonCBR | null = null;
-	private static lastFetchTimestamp: number = 0;
-	private static readonly CACHE_DURATION: number = 10 * 60 * 1000; // 10 minutes
+	static cachedData: JsonCBR | null = null;
+	static lastFetchTimestamp: number = 0;
+	static readonly CACHE_DURATION: number = 10 * 60 * 1000; // 10 minutes
 
 	static async getJsonCBR(): Promise<JsonCBR> {
 		const now = Date.now();
@@ -56,7 +56,7 @@ export class CurrencyAPI {
 		return result;
 	}
 
-	private static async getValue(currency: string): Promise<number> {
+	static async getValue(currency: string): Promise<number> {
 		const json = await this.getJsonCBR();
 
 		try {
@@ -68,6 +68,9 @@ export class CurrencyAPI {
 
 	static async getCurrencyRate(firstCurrency: string, secondCurrency: string): Promise<number> {
 		try {
+			if (firstCurrency === secondCurrency) {
+				return 1;
+			}
 			if (firstCurrency === "RUB") {
 				return await this.getValue(secondCurrency);
 			} else if (secondCurrency === "RUB") {
